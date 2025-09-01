@@ -1,2 +1,20 @@
-# Weather_App
-A futuristic glassy weather app with frosted UI, dynamic seasonal visuals, 7-day and hourly forecasts, interactive map, AQI, and real-time alerts. Features a unique Seasonal Info Box showing local and global seasons.
+# 🌤️ Glassmorphic Weather App  
+
+A futuristic **weather app** built with 🌐 HTML, 🎨 CSS, and ⚡ JavaScript.  
+Features a 🌫️ frosted glass UI, 🍂 seasonal visuals, 🗺️ interactive map, and 📅 detailed forecasts.  
+❤️ Made with love by **Chinmayee Avadhani**  
+
+## ✨ Features  
+🌡 Live conditions: temperature, humidity, wind, UV index, sunrise & sunset  
+📅 7-day & 🕒 hourly forecasts with smooth animations  
+🍂 Seasonal Info Box showing local & global seasons  
+🗺️ Interactive map + 🌍 Air Quality Index  
+⚠️ Real-time weather alerts  
+
+## 🚀 Tech Stack  
+🌐 HTML  
+🎨 CSS  
+⚡ JavaScript  
+
+## 📜 License  
+📝 MIT License © 2025 — Chinmayee Avadhani  
