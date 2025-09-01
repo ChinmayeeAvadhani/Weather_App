@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-bg: linear-gradient(135deg, #1a1c2d, #2d324d);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --card-border: rgba(255, 255, 255, 0.15);
+            --text-color: #fff;
+            --gradient-text: linear-gradient(90deg, #fff, #a3d9ff);
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --theme-handle-pos: 3px;
+        }
+
+        body.light-mode {
+            --primary-bg: linear-gradient(135deg, #c7d2fe, #e0e7ff);
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --card-border: rgba(255, 255, 255, 0.5);
+            --text-color: #2d3748;
+            --gradient-text: linear-gradient(90deg, #4a5568, #667eea);
+            --shadow-color: rgba(0, 0, 0, 0.05);
+            --theme-handle-pos: 33px;
+        }
+
+        body {
+            background: var(--primary-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 20px;
+            position: relative;
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+
+        /* Dynamic background with subtle motion */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+
+        .clouds {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><path fill="rgba(255,255,255,0.05)" d="M50,70 C30,70 10,85 10,105 C10,125 30,140 50,140 L150,140 C170,140 190,125 190,105 C190,85 170,70 150,70 C150,40 125,20 100,20 C75,20 50,40 50,70 Z"></path></svg>');
+            animation: cloudsMove 60s infinite linear;
+        }
+
+        .sun-rays {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 20%, rgba(255, 220, 100, 0.1) 0%, transparent 40%);
+            animation: rotateRays 30s infinite linear;
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 60px 20px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 50px, #eee, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 110px 80px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 140px 10px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 160px 60px, #eee, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 180px 30px, #fff, rgba(0,0,0,0));
+            animation: twinkle 4s infinite;
+        }
+
+        /* App container */
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .branding-center {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text-color);
+            text-align: center;
+            flex: 1;
+        }
+
+        .theme-switch {
+            width: 60px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            position: relative;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 15px var(--shadow-color);
+        }
+
+        .theme-switch-handle {
+            width: 24px;
+            height: 24px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: var(--theme-handle-pos);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        /* Main dashboard */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        /* Glassmorphic cards */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px var(--shadow-color);
+            border: 1px solid var(--card-border);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Current weather */
+        .current-weather {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .temperature {
+            font-size: 5rem;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(163, 217, 255, 0.5);
+        }
+
+        .weather-info {
+            text-align: right;
+        }
+
+        .location {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .condition {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Weather details */
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .detail-item {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .detail-icon {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Hourly forecast */
+        .hourly-forecast {
+            grid-column: 1 / -1;
+            overflow-x: auto;
+            padding: 15px 0;
+        }
+
+        .hourly-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .hour-item {
+            min-width: 80px;
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .hour-time {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .hour-icon {
+            font-size: 1.5rem;
+            margin: 10px 0;
+        }
+
+        .hour-temp {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* Weekly forecast */
+        .weekly-forecast {
+            grid-column: 1 / -1;
+        }
+
+        .weekly-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            overflow-x: auto;
+            padding: 15px 0;
+        }
+
+        .day-card {
+            min-width: 120px;
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .day-name {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .day-icon {
+            font-size: 2rem;
+            margin: 10px 0;
+        }
+
+        .day-temp {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* Map and AQI */
+        .map-aqi {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .mini-map {
+            height: 200px;
+            border-radius: 15px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #5b6ab0, #3a416f);
+            position: relative;
+        }
+
+        .location-pin {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: #ff3366;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            box-shadow: 0 0 20px #ff3366;
+            animation: pulse 2s infinite;
+        }
+
+        .location-pin::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+        .aqi-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .aqi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .aqi-status {
+            font-size: 1.2rem;
+            padding: 5px 15px;
+            border-radius: 20px;
+            background: rgba(100, 255, 100, 0.2);
+            display: inline-block;
+        }
+
+        /* Weather alert */
+        .weather-alert {
+            grid-column: 1 / -1;
+            background: rgba(255, 100, 100, 0.2);
+            border: 1px solid rgba(255, 100, 100, 0.3);
+            padding: 15px;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .alert-icon {
+            font-size: 2rem;
+            color: #ff6b6b;
+        }
+
+        /* Animations */
+        @keyframes cloudsMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 200px 200px; }
+        }
+
+        @keyframes rotateRays {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: rotate(-45deg) scale(1); }
+            50% { transform: rotate(-45deg) scale(1.1); }
+            100% { transform: rotate(-45deg) scale(1); }
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        .fa-sun {
+            animation: rotateRays 10s infinite linear;
+            color: #FFD700;
+        }
+
+        .fa-cloud {
+            animation: float 5s infinite ease-in-out;
+        }
+
+        .fa-cloud-rain {
+            animation: float 5s infinite ease-in-out;
+            color: #6c8baf;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .map-aqi {
+                grid-template-columns: 1fr;
+            }
+            
+            .temperature {
+                font-size: 3.5rem;
+            }
+            
+            .location {
+                font-size: 1.5rem;
+            }
+            
+            .weather-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .weekly-container {
+                flex-direction: column;
+            }
+            
+            .day-card {
+                min-width: auto;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Dynamic background layers -->
+    <div class="background">
+        <div class="clouds"></div>
+        <div class="sun-rays"></div>
+        <div class="stars"></div>
+    </div>
+
+    <div class="app-container">
+        <header class="app-header glassy">
+            <div class="branding-center">
+                <!-- Remove branding from header, just app name -->
+                <span class="app-title">Weather App</span>
+            </div>
+            <div class="theme-switch glassy">
+                <div class="theme-switch-handle"><i class="fas fa-moon"></i></div>
+            </div>
+        </header>
+
+        <main class="dashboard">
+            <!-- Weather Alert Banner -->
+            <div class="weather-alert glassy" id="weather-alert" style="display:none;">
+                <div class="alert-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                <div class="alert-content">
+                    <h3 id="alert-title">Weather Alert</h3>
+                    <p id="alert-message"></p>
+                </div>
+            </div>
+
+            <!-- Main Weather Panel -->
+            <div class="glass-card current-weather glassy">
+                <div class="temperature" id="current-temp">--°</div>
+                <div class="weather-info">
+                    <h2 class="location" id="current-location">--</h2>
+                    <p class="condition" id="current-condition">--</p>
+                    <div class="weather-anim-icon" id="weather-anim-icon">
+                        <!-- Animated weather icon injected by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weather Details Mini Cards -->
+            <div class="glass-card weather-details glassy">
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-tint"></i></div>
+                    <div class="detail-value" id="humidity">--%</div>
+                    <div class="detail-label">Humidity</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-wind"></i></div>
+                    <div class="detail-value" id="wind">-- km/h</div>
+                    <div class="detail-label">Wind</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-compass"></i></div>
+                    <div class="detail-value" id="wind-dir">--</div>
+                    <div class="detail-label">Direction</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-temperature-low"></i></div>
+                    <div class="detail-value" id="feels-like">--°</div>
+                    <div class="detail-label">Feels Like</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-sun"></i></div>
+                    <div class="detail-value" id="uv">--</div>
+                    <div class="detail-label">UV Index</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    <div class="detail-value" id="pressure">-- hPa</div>
+                    <div class="detail-label">Pressure</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-eye"></i></div>
+                    <div class="detail-value" id="visibility">-- km</div>
+                    <div class="detail-label">Visibility</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-arrow-up"></i></div>
+                    <div class="detail-value" id="sunrise">--:--</div>
+                    <div class="detail-label">Sunrise</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-arrow-down"></i></div>
+                    <div class="detail-value" id="sunset">--:--</div>
+                    <div class="detail-label">Sunset</div>
+                </div>
+            </div>
+
+            <!-- Hourly Forecast Timeline -->
+            <div class="glass-card hourly-forecast glassy">
+                <h3>Hourly Forecast</h3>
+                <div class="hourly-container">
+                    <div class="hour-item">
+                        <div class="hour-time">Now</div>
+                        <div class="hour-icon"><i class="fas fa-cloud-sun"></i></div>
+                        <div class="hour-temp">26°</div>
+                    </div>
+                    <div class="hour-item">
+                        <div class="hour-time">15:00</div>
+                        <div class="hour-icon"><i class="fas fa-sun"></i></div>
+                        <div class="hour-temp">28°</div>
+                    </div>
+                    <div class="hour-item">
+                        <div class="hour-time">16:00</div>
+                        <div class="hour-icon"><i class="fas fa-sun"></i></div>
+                        <div class="hour-temp">29°</div>
+                    </div>
+                    <div class="hour-item">
+                        <div class="hour-time">17:00</div>
+                        <div class="hour-icon"><i class="fas fa-cloud-sun"></i></div>
+                        <div class="hour-temp">28°</div>
+                    </div>
+                    <div class="hour-item">
+                        <div class="hour-time">18:00</div>
+                        <div class="hour-icon"><i class="fas fa-cloud"></i></div>
+                        <div class="hour-temp">26°</div>
+                    </div>
+                    <div class="hour-item">
+                        <div class="hour-time">19:00</div>
+                        <div class="hour-icon"><i class="fas fa-cloud"></i></div>
+                        <div class="hour-temp">25°</div>
+                    </div>
+                    <div class="hour-item">
+                        <div class="hour-time">20:00</div>
+                        <div class="hour-icon"><i class="fas fa-cloud-moon"></i></div>
+                        <div class="hour-temp">24°</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Forecast Section -->
+            <div class="glass-card weekly-forecast glassy">
+                <h3>7-Day Forecast</h3>
+                <div class="weekly-container" id="weekly-forecast">
+                    <!-- Weekly forecast cards injected by JS -->
+                </div>
+            </div>
+
+            <!-- Seasonal Info Box -->
+            <div class="glass-card season-info glassy" id="season-info">
+                <div class="season-icon" id="season-icon"></div>
+                <div class="season-details">
+                    <div class="season-name" id="season-name">--</div>
+                    <div class="season-location" id="season-location">--</div>
+                </div>
+            </div>
+
+            <!-- AQI & Mini Map -->
+            <div class="glass-card map-aqi glassy">
+                <div class="mini-map" id="mini-map">
+                    <div class="location-pin"></div>
+                </div>
+                <div class="aqi-container">
+                    <h3>Air Quality</h3>
+                    <div class="aqi-value" id="aqi-value">--</div>
+                    <div class="aqi-status" id="aqi-status">--</div>
+                    <p id="aqi-desc">--</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    <footer class="footer-glassy">
+        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+            <span>Made with <span class="footer-heart">&#10084;&#65039;</span> by Chinmayee Avadhani</span>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>

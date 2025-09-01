@@ -1,0 +1,189 @@
+:root {
+    --primary-bg: linear-gradient(135deg, #1a1c2d, #2d324d);
+    --card-bg: rgba(255,255,255,0.05);
+    --card-border: rgba(255,255,255,0.10);
+    --glass-blur: blur(36px) saturate(200%);
+    --glass-shadow: 0 8px 32px 0 rgba(30,39,70,0.20), 0 0 0 2px rgba(255,255,255,0.12);
+    --glass-hover: rgba(255,255,255,0.15);
+    --footer-glow: 0 0 8px #a3d9ff, 0 0 2px #fff;
+    --footer-heart: #ff6b81;
+}
+
+body.light-mode {
+    --primary-bg: linear-gradient(135deg, #c7d2fe, #e0e7ff);
+    --card-bg: rgba(255,255,255,0.28);
+    --card-border: rgba(255,255,255,0.18);
+    --glass-blur: blur(28px) saturate(180%);
+    --glass-shadow: 0 8px 32px 0 rgba(163,217,255,0.13), 0 0 0 2px rgba(255,255,255,0.13);
+    --glass-hover: rgba(255,255,255,0.22);
+    --footer-glow: 0 0 8px #667eea, 0 0 2px #fff;
+    --footer-heart: #e25555;
+}
+
+body {
+    background: var(--primary-bg);
+    color: var(--text-color, #fff);
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding: 20px;
+    position: relative;
+    transition: background 0.5s, color 0.5s;
+}
+
+/* Glassy/frosted effect for all panels */
+.glassy, .glass-card {
+    background: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    border-radius: 22px;
+    box-shadow: var(--glass-shadow);
+    border: 1.5px solid var(--card-border);
+    transition: background 0.3s, box-shadow 0.3s;
+}
+.glass-card:hover, .glassy:hover {
+    background: var(--glass-hover);
+    box-shadow: 0 12px 40px 0 rgba(163,217,255,0.18), 0 0 0 3px rgba(255,255,255,0.13);
+}
+
+/* Dynamic background layers */
+.background {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: -2;
+    overflow: hidden;
+}
+.bg-scenery, .bg-gradient, .bg-anim {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+}
+.bg-gradient {
+    z-index: 1;
+    background: linear-gradient(135deg, #a3d9ff 0%, #fbc2eb 100%);
+    opacity: 0.55;
+    transition: background 1s;
+}
+.bg-scenery {
+    z-index: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0.22;
+    transition: background-image 1s;
+}
+.bg-anim.clouds { background: none; z-index: 2; animation: cloudsMove 60s linear infinite; }
+.bg-anim.sun-rays { background: none; z-index: 3; animation: rotateRays 30s linear infinite; }
+.bg-anim.snowflakes { z-index: 4; pointer-events: none; }
+.bg-anim.rain { z-index: 4; pointer-events: none; }
+.bg-anim.aurora { z-index: 5; pointer-events: none; }
+.bg-anim.leaves { z-index: 4; pointer-events: none; }
+.bg-anim.stars { z-index: 6; animation: twinkle 4s infinite; pointer-events: none; }
+
+/* Micro-animations for overlays (simple demo, expand in JS for more realism) */
+.bg-anim.snowflakes::before, .bg-anim.snowflakes::after {
+    content: '';
+    position: absolute;
+    width: 100vw; height: 100vh;
+    background: url('data:image/svg+xml;utf8,<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="2" fill="white" opacity="0.5"/></svg>');
+    background-size: 20px 20px;
+    animation: snowDrift 12s linear infinite;
+    opacity: 0.5;
+}
+.bg-anim.rain::before {
+    content: '';
+    position: absolute;
+    width: 100vw; height: 100vh;
+    background: url('data:image/svg+xml;utf8,<svg width="4" height="12" xmlns="http://www.w3.org/2000/svg"><rect width="2" height="12" fill="white" opacity="0.15"/></svg>');
+    background-size: 4px 12px;
+    animation: rainDrift 2s linear infinite;
+    opacity: 0.3;
+}
+.bg-anim.aurora::before {
+    content: '';
+    position: absolute;
+    width: 100vw; height: 100vh;
+    background: linear-gradient(120deg, #b993d6 0%, #8ca6db 100%);
+    opacity: 0.18;
+    filter: blur(32px);
+    animation: auroraMove 16s linear infinite;
+}
+.bg-anim.leaves::before {
+    content: '';
+    position: absolute;
+    width: 100vw; height: 100vh;
+    background: url('data:image/svg+xml;utf8,<svg width="16" height="16" xmlns="http://www.w3.org/2000/svg"><ellipse cx="8" cy="8" rx="6" ry="2" fill="orange" opacity="0.3"/></svg>');
+    background-size: 16px 16px;
+    animation: leavesDrift 10s linear infinite;
+    opacity: 0.2;
+}
+
+/* Animated weather icons */
+.animated-rain { animation: rainDrop 1.2s infinite linear; }
+.animated-snow { animation: snowFlake 2s infinite linear; }
+.animated-sun { animation: rotateRays 8s infinite linear; color: #FFD700; }
+.animated-cloud { animation: float 5s infinite ease-in-out; }
+
+/* Footer branding */
+.footer-glassy {
+    margin-top: 2rem;
+    text-align: center;
+    padding: 1rem 0 0.5rem 0;
+    color: #b3c7f7;
+    font-size: 1.05rem;
+    opacity: 0.85;
+    background: var(--card-bg);
+    border-radius: 18px;
+    box-shadow: var(--footer-glow);
+    backdrop-filter: var(--glass-blur);
+    border: 1.5px solid var(--card-border);
+    letter-spacing: 0.02em;
+}
+.footer-heart {
+    color: var(--footer-heart);
+    font-size: 1.2em;
+    vertical-align: middle;
+    text-shadow: 0 0 6px #fff8;
+}
+
+/* Animations */
+@keyframes cloudsMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 200px 200px; }
+}
+@keyframes rotateRays {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(360deg);}
+}
+@keyframes float {
+    0% { transform: translateY(0);}
+    50% { transform: translateY(-10px);}
+    100% { transform: translateY(0);}
+}
+@keyframes twinkle {
+    0% { opacity: 0.5;}
+    50% { opacity: 1;}
+    100% { opacity: 0.5;}
+}
+@keyframes snowDrift {
+    0% { background-position: 0 0;}
+    100% { background-position: 0 100vh;}
+}
+@keyframes rainDrift {
+    0% { background-position: 0 -20vh;}
+    100% { background-position: 0 100vh;}
+}
+@keyframes auroraMove {
+    0% { background-position: 0 0;}
+    100% { background-position: 100vw 100vh;}
+}
+@keyframes leavesDrift {
+    0% { background-position: 0 0;}
+    100% { background-position: 100vw 100vh;}
+}
+@keyframes rainDrop {
+    0% { opacity: 1; transform: translateY(0);}
+    100% { opacity: 0.2; transform: translateY(8px);}
+}
+@keyframes snowFlake {
+    0% { opacity: 1; transform: translateY(0);}
+    100% { opacity: 0.2; transform: translateY(10px);}
+}
+
+/* ...existing responsive, animation, and icon styles... */
