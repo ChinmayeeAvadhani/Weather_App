@@ -2,7 +2,6 @@
 
 A futuristic **weather app** built with 🌐 HTML, 🎨 CSS, and ⚡ JavaScript.  
 Features a 🌫️ frosted glass UI, 🍂 seasonal visuals, 🗺️ interactive map, and 📅 detailed forecasts.  
-❤️ Made with love by **Chinmayee Avadhani**  
 
 ## ✨ Features  
 🌡 Live conditions: temperature, humidity, wind, UV index, sunrise & sunset  
